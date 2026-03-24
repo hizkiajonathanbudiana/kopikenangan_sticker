@@ -24,7 +24,8 @@ export type StickerTheme = {
       title: string;
       description: string;
       accountTitle: string;
-      accountSubtitle: string;
+  sponsorTagline: string;
+  accountSubtitle: string;
       validity: string;
       buttonLabel: string;
       themeDescription: string;
@@ -115,8 +116,9 @@ export const stickerThemes: StickerTheme[] = [
         title: "Brand Commerce × Ka-Kun (Kawung)",
         description:
           "Kopi Kenangan × Ka-Kun free stickers launch today! Bring Yogyakarta's Kawung heritage to every conversation and add the official account to claim before 2026/04/16.",
-        accountTitle: "LINE Shopping Brand Store",
-        accountSubtitle: "One tap to catch exclusive fits and discounts.",
+  accountTitle: "Kopi Kenangan",
+  sponsorTagline: "Sponsor for this sticker set",
+  accountSubtitle: "One tap to catch exclusive fits and discounts.",
         validity: "Valid for 90 days",
         buttonLabel: "👤 Add this friend to download for free!",
         themeDescription: "Bold espresso palette with Kawung pattern cues.",
@@ -126,8 +128,9 @@ export const stickerThemes: StickerTheme[] = [
         title: "品牌商務 × 卡君（Kawung）",
         description:
           "Kopi Kenangan × 卡君免費貼圖今天上線囉！讓充滿日惹 Kawung 傳統風情的卡君陪你聊天，下載期限至 2026/04/16。",
-        accountTitle: "LINE購物品牌名店",
-        accountSubtitle: "品牌名店穿搭折扣一把抓。",
+  accountTitle: "Kopi Kenangan",
+  sponsorTagline: "本貼圖組贊助合作",
+  accountSubtitle: "品牌名店穿搭折扣一把抓。",
         validity: "有效期限 90 天",
         buttonLabel: "👤 加好友立即免費下載",
         themeDescription: "濃烈咖啡色系搭配 Kawung 圖紋靈感。",
@@ -162,8 +165,9 @@ export const stickerThemes: StickerTheme[] = [
         title: "Brand Commerce × Mega-Miu",
         description:
           "Kopi Kenangan × Mega-Miu free stickers are live! Bring the Mega Mendung cloud motif to your chat list and grab them before 2026/04/16.",
-        accountTitle: "LINE Shopping Premium Store",
-        accountSubtitle: "Discover trusted brand boutiques with one tap.",
+  accountTitle: "Kopi Kenangan",
+  sponsorTagline: "Sponsor for this sticker set",
+  accountSubtitle: "Discover trusted brand boutiques with one tap.",
         validity: "Valid for 90 days",
         buttonLabel: "👤 Add this friend to download for free!",
         themeDescription: "Dreamy gradients with cloud-light interactions.",
@@ -173,8 +177,9 @@ export const stickerThemes: StickerTheme[] = [
         title: "品牌商務 × 雲美格",
         description:
           "Kopi Kenangan × 雲美格（Mega-Miu）免費貼圖今天上線囉！帶著井里汶 Mega Mendung 雲朵圖騰の超萌美格陪你聊天，下載期限至 2026/04/16。",
-        accountTitle: "LINE購物品牌名店",
-        accountSubtitle: "品牌名店穿搭折扣一把抓。",
+  accountTitle: "Kopi Kenangan",
+  sponsorTagline: "本貼圖組贊助合作",
+  accountSubtitle: "品牌名店穿搭折扣一把抓。",
         validity: "有效期限 90 天",
         buttonLabel: "👤 加好友立即免費下載",
         themeDescription: "柔霧藍紫色系與雲朵互動。",

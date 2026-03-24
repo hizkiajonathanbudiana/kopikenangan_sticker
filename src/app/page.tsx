@@ -3,7 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useMemo, useState, useRef, useEffect } from "react";
-import html2canvas from "html2canvas";
+import { toPng } from "html-to-image";
 
 import {
   Locale,
@@ -46,37 +46,19 @@ export default function Home() {
     try {
       await ensurePreviewAssetsReady(previewRefState);
 
-      const canvas = await html2canvas(previewRefState, {
-        scale: window.devicePixelRatio > 1 ? window.devicePixelRatio : 2,
-        useCORS: true,
-        allowTaint: false,
+      const dataUrl = await toPng(previewRefState, {
+        cacheBust: true,
         backgroundColor: "#ffffff",
-        logging: false,
-        removeContainer: true,
-        onclone: (clonedDoc) => {
-          const clonedPreview = clonedDoc.querySelector<HTMLElement>("[data-preview-root]");
-          if (clonedPreview) {
-            normalizeColorsForCanvas(clonedPreview);
-          }
-        },
+        pixelRatio: Math.max(window.devicePixelRatio || 1, 2),
       });
 
-      const blob = await new Promise<Blob | null>((resolve) =>
-        canvas.toBlob((result) => resolve(result), "image/png", 1)
-      );
-
-      if (!blob) {
-        throw new Error("Canvas export returned null blob");
-      }
-
-      const imageUrl = URL.createObjectURL(blob);
+      const linkSource = dataUrl;
       const link = document.createElement("a");
-      link.href = imageUrl;
+      link.href = linkSource;
       link.download = `${activeCopy.downloadFilename}-${activeTheme.id}-${locale}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      URL.revokeObjectURL(imageUrl);
     } catch (error) {
       console.error("Download failed:", error);
       alert("Failed to generate image. Please try again.");
@@ -228,7 +210,6 @@ function ThemePreview({
   return (
     <div
       ref={localRef}
-      data-preview-root="true"
       className="rounded-[36px] border border-slate-200 bg-white shadow-[0_25px_80px_rgba(15,23,42,0.08)] cursor-default"
       // Klik di sembarang area kosong akan me-reset zoom stiker
       onClick={() => setZoomedId(null)}
@@ -242,18 +223,15 @@ function ThemePreview({
       </div>
 
       <div className="flex flex-col items-center px-12 pb-6 pt-6 text-center">
-        <div className="flex h-36 w-36 items-center justify-center rounded-[30px] border border-slate-200 bg-slate-50">
-          <img
-            src={theme.logo}
-            alt={logoAlt}
-            width={112}
-            height={112}
-            loading="eager"
-            decoding="async"
-            crossOrigin="anonymous"
-            draggable={false}
-            className="object-contain select-none"
-          />
+        <div className="flex h-36 w-36 items-center justify-center rounded-[30px] border border-slate-200 bg-slate-50 overflow-hidden">
+          <div className="h-full w-full">
+            <img
+              src={theme.logo}
+              alt={logoAlt}
+              className="h-full w-full object-cover select-none"
+              draggable={false}
+            />
+          </div>
         </div>
         <span className="mt-6 rounded-full border border-slate-200 bg-slate-50 px-4 py-1 text-xs text-slate-500">
           {copy.brandTag}
@@ -267,11 +245,22 @@ function ThemePreview({
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold">{copy.accountTitle}</p>
-              <p className="text-xs text-slate-500">{copy.accountSubtitle}</p>
+              <p className="text-xs text-slate-500">{copy.sponsorTagline}</p>
+              <p className="text-xs text-slate-400">{copy.accountSubtitle}</p>
             </div>
-            <span className="flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 text-xl">
-              🛍️
-            </span>
+            <div className="flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white">
+              <img
+                src="/stickers/kopikenangan.png"
+                alt="Kopi Kenangan logo"
+                width={28}
+                height={28}
+                className="h-7 w-7 object-contain"
+                loading="lazy"
+                decoding="async"
+                crossOrigin="anonymous"
+                draggable={false}
+              />
+            </div>
           </div>
           <button
             type="button"
@@ -438,51 +427,4 @@ function enforceSolidBackground(node: HTMLElement) {
     }
     node.style.backgroundColor = previousBackground;
   };
-}
-
-const COLOR_PROPS = [
-  "color",
-  "backgroundColor",
-  "borderTopColor",
-  "borderRightColor",
-  "borderBottomColor",
-  "borderLeftColor",
-  "outlineColor",
-  "textDecorationColor",
-  "columnRuleColor",
-] as const;
-
-const MODERN_COLOR_PATTERN = /(oklch|oklab|lch|lab|color\()/i;
-
-function normalizeColorsForCanvas(root: HTMLElement) {
-  const doc = root.ownerDocument;
-  const view = doc.defaultView;
-  if (!view) return;
-
-  const canvas = doc.createElement("canvas");
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
-
-  const allElements: HTMLElement[] = [root, ...Array.from(root.querySelectorAll<HTMLElement>("*"))];
-
-  for (const element of allElements) {
-    const computed = view.getComputedStyle(element);
-    for (const prop of COLOR_PROPS) {
-      const value = computed[prop];
-      if (!value || !MODERN_COLOR_PATTERN.test(value)) continue;
-      const normalized = convertModernColor(value, ctx);
-      if (normalized) {
-        element.style[prop] = normalized;
-      }
-    }
-  }
-}
-
-function convertModernColor(value: string, ctx: CanvasRenderingContext2D) {
-  try {
-    ctx.fillStyle = value;
-    return ctx.fillStyle;
-  } catch {
-    return null;
-  }
 }
