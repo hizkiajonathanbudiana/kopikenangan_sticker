@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LINE Sticker Template UI Kit",
+  title: "Kopi Kenangan × Batik LINE Stickers",
   description:
-    "Interactive template to preview LINE sticker pages with language + theme toggles.",
+    "Kopi Kenangan × Batik LINE Stickers",
 };
 
 export default function RootLayout({
