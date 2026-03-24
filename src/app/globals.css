@@ -19,3 +19,51 @@ body {
     "Segoe UI", sans-serif;
   min-height: 100vh;
 }
+
+.download-button-shell {
+  position: sticky;
+  bottom: 16px;
+  z-index: 30;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 12px 0 calc(16px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(180deg, rgba(245, 247, 251, 0) 0%, #f5f7fb 70%);
+}
+
+.download-button {
+  width: min(100%, 360px);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
+}
+
+@media (min-width: 768px) {
+  .download-button-shell {
+    position: static;
+    padding: 0;
+    background: none;
+  }
+
+  .download-button {
+    width: auto;
+    box-shadow: none;
+  }
+}
+
+.preview-scale-wrapper {
+  --preview-target-width: 430px;
+  --preview-target-height: 780px;
+  --preview-scale: 1;
+  position: relative;
+  width: min(100%, var(--preview-target-width));
+  height: calc(var(--preview-target-height, 780px) * var(--preview-scale, 1));
+  overflow: hidden;
+}
+
+.preview-scale-wrapper > .preview-card {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: var(--preview-target-width);
+  transform-origin: top center;
+  transform: translateX(-50%) scale(var(--preview-scale, 1));
+}

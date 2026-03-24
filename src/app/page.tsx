@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 
-import { useMemo, useState, useRef, useEffect } from "react";
+import { type CSSProperties, useMemo, useState, useRef, useEffect } from "react";
 import { toPng } from "html-to-image";
 import html2canvas from "html2canvas";
 import { converter, parse as parseColor } from "culori";
@@ -17,6 +17,9 @@ import {
   // globalAssets dihapus
 } from "@/data/stickerLab";
 
+const PREVIEW_BASE_WIDTH = 430;
+const PREVIEW_BASE_HEIGHT = 780;
+
 const landingCopy = {
   heroTitle: "Kopi Kenangan × Batik LINE Stickers",
   heroSubtitle:
@@ -30,6 +33,9 @@ export default function Home() {
 
   // State untuk menyimpan referensi DOM dari komponen preview untuk diunduh
   const [previewRefState, setPreviewRefState] = useState<HTMLDivElement | null>(null);
+  const previewWrapperRef = useRef<HTMLDivElement | null>(null);
+  const [previewScale, setPreviewScale] = useState(1);
+  const [previewHeight, setPreviewHeight] = useState(PREVIEW_BASE_HEIGHT);
 
   const activeTheme = useMemo(
     () => stickerThemes.find((theme) => theme.id === activeThemeId)!,
@@ -37,6 +43,58 @@ export default function Home() {
   );
 
   const activeCopy = uiCopy[locale];
+
+  useEffect(() => {
+    if (!previewWrapperRef.current) {
+      return;
+    }
+
+    const node = previewWrapperRef.current;
+
+    const updateScale = () => {
+      const width = node.clientWidth;
+      if (!width) return;
+      const nextScale = Math.min(1, width / PREVIEW_BASE_WIDTH);
+      setPreviewScale(Number(nextScale.toFixed(4)));
+    };
+
+    updateScale();
+
+    const resizeObserver = new ResizeObserver(updateScale);
+    resizeObserver.observe(node);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!previewRefState) {
+      setPreviewHeight(PREVIEW_BASE_HEIGHT);
+      return;
+    }
+
+    const node = previewRefState;
+
+    const updateHeight = () => {
+      const nextHeight = node.offsetHeight || PREVIEW_BASE_HEIGHT;
+      setPreviewHeight(nextHeight);
+    };
+
+    updateHeight();
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+      setPreviewHeight(entry.contentRect.height || PREVIEW_BASE_HEIGHT);
+    });
+
+    resizeObserver.observe(node);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [previewRefState]);
 
   // Fungsi untuk mengunduh preview sebagai gambar PNG
   const handleDownloadPreview = async () => {
@@ -86,7 +144,7 @@ export default function Home() {
         </div>
 
         {/* WRAPPER PREVIEW + TOMBOL DOWNLOAD */}
-        <section className="mx-auto flex w-full max-w-md flex-col gap-6">
+        <section className="mx-auto flex w-full max-w-[520px] flex-col gap-6">
           <div className="text-center">
             <p className="text-xs uppercase tracking-[0.35em] text-slate-500">
               {activeCopy.previewTitle}
@@ -95,19 +153,30 @@ export default function Home() {
           </div>
 
           {/* KOMPONEN PREVIEW STORE */}
-          <ThemePreview
-            locale={locale}
-            theme={activeTheme}
-            setPreviewRef={setPreviewRefState}
-          />
+          <div className="flex w-full justify-center">
+            <div
+              ref={previewWrapperRef}
+              className="preview-scale-wrapper"
+              style={{
+                "--preview-scale": `${previewScale}`,
+                "--preview-target-height": `${previewHeight}px`,
+              } as CSSProperties}
+            >
+              <ThemePreview
+                locale={locale}
+                theme={activeTheme}
+                setPreviewRef={setPreviewRefState}
+              />
+            </div>
+          </div>
 
           {/* TOMBOL ACTION UNTUK DOWNLOAD */}
-          <div className="flex justify-center pt-2">
+          <div className="download-button-shell">
             <button
               type="button"
               onClick={handleDownloadPreview}
               disabled={!previewRefState}
-              className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-3 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 hover:text-slate-900 disabled:opacity-50"
+              className="download-button flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-3 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 hover:text-slate-900 disabled:opacity-50"
             >
               <span>🖼️</span>
               {activeCopy.downloadAction}
@@ -215,7 +284,7 @@ function ThemePreview({
     <div
       ref={localRef}
       data-preview-root="true"
-      className="rounded-[36px] border border-slate-200 bg-white shadow-[0_25px_80px_rgba(15,23,42,0.08)] cursor-default"
+      className="preview-card rounded-[36px] border border-slate-200 bg-white shadow-[0_25px_80px_rgba(15,23,42,0.08)] cursor-default"
       // Klik di sembarang area kosong akan me-reset zoom stiker
       onClick={() => setZoomedId(null)}
     >
