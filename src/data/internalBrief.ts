@@ -100,7 +100,7 @@ export const briefSections: BriefSection[] = [
         ],
       },
       {
-        title: "LINE stickers",
+        title: "Kopi Kenangan × Batik LINE Stickers",
         bullets: [
           "Ka-Kun and Mega-Miu sticker sets tie the motifs into everyday chat language.",
           "Touch-projection kiosk concept lets guests scan a QR code to claim the packs instantly.",

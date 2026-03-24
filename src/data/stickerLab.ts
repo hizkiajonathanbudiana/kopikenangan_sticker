@@ -11,11 +11,11 @@ export type LanguageOption = {
 export type StickerTheme = {
   id: string;
   assetFolder: string;
-  logo: string; // Logo utama di atas (lingkaran)
+  logo: string;
   heroEmoji: string;
   heroBadge: string;
-  accent: string; // Warna untuk tombol toggle saat aktif
-  accentMuted: string; // Warna muted untuk toggle background saat aktif
+  accent: string;
+  accentMuted: string;
   previewTagline: Record<Locale, string>;
   copy: Record<
     Locale,
@@ -37,10 +37,10 @@ export type StickerTheme = {
   }>;
 };
 
-// Pastikan file logo_global.png ini ada di public/stickers/
-export const globalAssets = {
-  kopiKenanganLogoC: "/stickers/logo_global.png", 
-};
+// HAPUS BAGIAN INI: globalAssets sudah tidak digunakan
+// export const globalAssets = {
+//   kopiKenanganLogoC: "/stickers/logo_global.png", 
+// };
 
 // Warna hijau standard LINE (global untuk tombol utama di Store Preview)
 export const LINE_GREEN = "#06C755";
@@ -72,7 +72,6 @@ export const uiCopy: Record<
     heroSubtitle: string;
     previewTitle: string;
     previewSubtitle: string;
-    // Teks baru untuk tombol download
     downloadAction: string; 
     downloadFilename: string;
   }
@@ -104,7 +103,6 @@ export const stickerThemes: StickerTheme[] = [
     logo: "/stickers/logo_kakun.png",
     heroEmoji: "☕️",
     heroBadge: "Kawung",
-    // Warna accent Kawung (Hijau)
     accent: "#06C755", 
     accentMuted: "rgba(6, 199, 85, 0.18)",
     previewTagline: {
@@ -152,7 +150,6 @@ export const stickerThemes: StickerTheme[] = [
     logo: "/stickers/logo_mega.png",
     heroEmoji: "☁️",
     heroBadge: "Mega Mendung",
-    // Warna accent Mega-Miu (Biru)
     accent: "#6EC7FF", 
     accentMuted: "rgba(110, 199, 255, 0.18)",
     previewTagline: {
@@ -189,9 +186,9 @@ export const stickerThemes: StickerTheme[] = [
       { filename: "IMG_9442.PNG", emoji: "😠", label: { zh: "貼圖 03", en: "Sticker 03" } },
       { filename: "IMG_9445.PNG", emoji: "💤", label: { zh: "貼圖 04", en: "Sticker 04" } },
       { filename: "IMG_9447.PNG", emoji: "😊", label: { zh: "貼圖 05", en: "Sticker 05" } },
-      { filename: "IMG_9449.PNG", emoji: "�", label: { zh: "貼圖 06", en: "Sticker 06" } },
+      { filename: "IMG_9449.PNG", emoji: "🤍", label: { zh: "貼圖 06", en: "Sticker 06" } },
       { filename: "IMG_9452.PNG", emoji: "🤭", label: { zh: "貼圖 07", en: "Sticker 07" } },
-      { filename: "IMG_9453.PNG", emoji: "�", label: { zh: "貼圖 08", en: "Sticker 08" } },
+      { filename: "IMG_9453.PNG", emoji: "🌧️", label: { zh: "貼圖 08", en: "Sticker 08" } },
     ],
   },
 ];
