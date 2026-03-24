@@ -4,6 +4,8 @@
 
 import { useMemo, useState, useRef, useEffect } from "react";
 import { toPng } from "html-to-image";
+import html2canvas from "html2canvas";
+import { converter, parse as parseColor } from "culori";
 
 import {
   Locale,
@@ -46,19 +48,14 @@ export default function Home() {
     try {
       await ensurePreviewAssetsReady(previewRefState);
 
-      const dataUrl = await toPng(previewRefState, {
-        cacheBust: true,
-        backgroundColor: "#ffffff",
-        pixelRatio: Math.max(window.devicePixelRatio || 1, 2),
-      });
+      const dataUrl = shouldUseHtml2CanvasFallback()
+        ? await renderWithHtml2Canvas(previewRefState)
+        : await renderWithHtmlToImage(previewRefState);
 
-      const linkSource = dataUrl;
-      const link = document.createElement("a");
-      link.href = linkSource;
-      link.download = `${activeCopy.downloadFilename}-${activeTheme.id}-${locale}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      triggerDownload(
+        dataUrl,
+        `${activeCopy.downloadFilename}-${activeTheme.id}-${locale}.png`
+      );
     } catch (error) {
       console.error("Download failed:", error);
       alert("Failed to generate image. Please try again.");
@@ -217,6 +214,7 @@ function ThemePreview({
   return (
     <div
       ref={localRef}
+      data-preview-root="true"
       className="rounded-[36px] border border-slate-200 bg-white shadow-[0_25px_80px_rgba(15,23,42,0.08)] cursor-default"
       // Klik di sembarang area kosong akan me-reset zoom stiker
       onClick={() => setZoomedId(null)}
@@ -413,6 +411,119 @@ function disableAnimations() {
   return () => {
     style.remove();
   };
+}
+
+async function renderWithHtmlToImage(node: HTMLElement) {
+  return toPng(node, {
+    cacheBust: true,
+    backgroundColor: "#ffffff",
+    pixelRatio: Math.max(window.devicePixelRatio || 1, 2),
+  });
+}
+
+async function renderWithHtml2Canvas(node: HTMLElement) {
+  const canvas = await html2canvas(node, {
+    scale: Math.max(window.devicePixelRatio || 1, 2),
+    useCORS: true,
+    allowTaint: false,
+    backgroundColor: "#ffffff",
+    logging: false,
+    removeContainer: true,
+    onclone: (clonedDoc) => {
+      const clonedPreview = clonedDoc.querySelector<HTMLElement>("[data-preview-root='true']");
+      if (clonedPreview) {
+        normalizeColorsForCanvas(clonedPreview);
+      }
+    },
+  });
+
+  return canvas.toDataURL("image/png");
+}
+
+function triggerDownload(dataUrl: string, filename: string) {
+  const link = document.createElement("a");
+  link.href = dataUrl;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function shouldUseHtml2CanvasFallback() {
+  if (typeof navigator === "undefined") {
+    return false;
+  }
+
+  const ua = navigator.userAgent || "";
+  const isIOS = /iP(ad|hone|od)/i.test(ua);
+  const isMacSafari =
+    /Macintosh/.test(ua) && /Safari/i.test(ua) && !/Chrome|CriOS|FxiOS|EdgiOS/i.test(ua);
+
+  return isIOS || isMacSafari;
+}
+
+const COLOR_PROPS: Array<[keyof CSSStyleDeclaration, string]> = [
+  ["color", "color"],
+  ["backgroundColor", "background-color"],
+  ["borderTopColor", "border-top-color"],
+  ["borderRightColor", "border-right-color"],
+  ["borderBottomColor", "border-bottom-color"],
+  ["borderLeftColor", "border-left-color"],
+  ["outlineColor", "outline-color"],
+  ["textDecorationColor", "text-decoration-color"],
+  ["columnRuleColor", "column-rule-color"],
+  ["caretColor", "caret-color"],
+  ["fill", "fill"],
+  ["stroke", "stroke"],
+];
+
+const MODERN_COLOR_PATTERN = /(oklch|oklab|lch|lab|color\(|var\()/i;
+const toRgb = converter("rgb");
+
+function normalizeColorsForCanvas(root: HTMLElement) {
+  const doc = root.ownerDocument;
+  const view = doc.defaultView;
+  if (!view) return;
+
+  const elements: HTMLElement[] = [root, ...Array.from(root.querySelectorAll<HTMLElement>("*"))];
+
+  for (const element of elements) {
+    const computed = view.getComputedStyle(element);
+    for (const [, cssProp] of COLOR_PROPS) {
+      const value = computed.getPropertyValue(cssProp);
+      if (!value || !MODERN_COLOR_PATTERN.test(value)) continue;
+      const normalized = convertModernColor(value.trim());
+      if (normalized) {
+        element.style.setProperty(cssProp, normalized, "important");
+      }
+    }
+  }
+}
+
+function convertModernColor(value: string) {
+  const parsed = parseColor(value);
+  if (!parsed) {
+    return null;
+  }
+
+  const rgbColor = toRgb(parsed);
+  if (!rgbColor) {
+    return null;
+  }
+
+  const clamp = (channel: number) => Math.max(0, Math.min(255, Math.round(channel * 255)));
+
+  const alpha = typeof rgbColor.alpha === "number" ? rgbColor.alpha : 1;
+  const r = clamp(rgbColor.r ?? 0);
+  const g = clamp(rgbColor.g ?? 0);
+  const b = clamp(rgbColor.b ?? 0);
+
+  if (alpha >= 1) {
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+
+  const normalizedAlpha = Math.max(0, Math.min(1, alpha));
+  return `rgba(${r}, ${g}, ${b}, ${Number(normalizedAlpha.toFixed(4))})`;
 }
 
 function enforceSolidBackground(node: HTMLElement) {
