@@ -130,31 +130,38 @@ function TemplateToggle({
   onSelect: (id: string) => void;
 }) {
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      {stickerThemes.map((theme) => (
-        <button
-          key={theme.id}
-          type="button"
-          onClick={() => onSelect(theme.id)}
-          className={`text-left transition ${activeId === theme.id
-            ? "rounded-3xl border-2 border-lime-400 bg-lime-50 p-6 shadow-lg"
-            : "rounded-3xl border border-slate-200 bg-white p-6 hover:border-slate-400"
-            }`}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-3xl" aria-hidden>
-              {theme.heroEmoji}
-            </span>
-            <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500">
-              {theme.heroBadge}
-            </span>
-          </div>
-          <h2 className="mt-4 text-2xl font-semibold">
-            {theme.copy.en.title}
-          </h2>
-          <p className="text-sm text-slate-500">{theme.previewTagline.en}</p>
-        </button>
-      ))}
+    <div className="grid gap-4 md:grid-cols-2 md:items-stretch">
+      {stickerThemes.map((theme) => {
+        const isActive = activeId === theme.id;
+        return (
+          <button
+            key={theme.id}
+            type="button"
+            onClick={() => onSelect(theme.id)}
+            className={`${isActive
+              ? "rounded-3xl border-2 border-lime-400 bg-lime-50 shadow-lg"
+              : "rounded-3xl border border-slate-200 bg-white hover:border-slate-400"
+              } h-full px-6 py-6 text-left transition`}
+          >
+            <div className="grid h-full grid-rows-[auto_auto_1fr] gap-4">
+              <div className="flex items-center justify-between">
+                <span className="text-3xl" aria-hidden>
+                  {theme.heroEmoji}
+                </span>
+                <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500">
+                  {theme.heroBadge}
+                </span>
+              </div>
+              <h2 className="text-2xl font-semibold leading-snug text-slate-900">
+                {theme.copy.en.title}
+              </h2>
+              <p className="text-sm text-slate-500">
+                {theme.previewTagline.en}
+              </p>
+            </div>
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -246,7 +253,6 @@ function ThemePreview({
             <div>
               <p className="text-sm font-semibold">{copy.accountTitle}</p>
               <p className="text-xs text-slate-500">{copy.sponsorTagline}</p>
-              <p className="text-xs text-slate-400">{copy.accountSubtitle}</p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white">
               <img
