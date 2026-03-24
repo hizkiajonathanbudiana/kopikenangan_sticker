@@ -143,7 +143,7 @@ export default function Home() {
           <LanguageToggle activeLocale={locale} onSelect={setLocale} />
         </div>
 
-        {/* WRAPPER PREVIEW + TOMBOL DOWNLOAD */}
+        {/* WRAPPER PREVIEW */}
         <section className="mx-auto flex w-full max-w-[520px] flex-col gap-6">
           <div className="text-center">
             <p className="text-xs uppercase tracking-[0.35em] text-slate-500">
@@ -162,26 +162,16 @@ export default function Home() {
                 "--preview-target-height": `${previewHeight}px`,
               } as CSSProperties}
             >
-              <ThemePreview
-                locale={locale}
-                theme={activeTheme}
-                setPreviewRef={setPreviewRefState}
-              />
+              <div className="preview-scale-inner">
+                <ThemePreview
+                  locale={locale}
+                  theme={activeTheme}
+                  setPreviewRef={setPreviewRefState}
+                />
+              </div>
             </div>
           </div>
 
-          {/* TOMBOL ACTION UNTUK DOWNLOAD */}
-          <div className="download-button-shell">
-            <button
-              type="button"
-              onClick={handleDownloadPreview}
-              disabled={!previewRefState}
-              className="download-button flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-3 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 hover:text-slate-900 disabled:opacity-50"
-            >
-              <span>🖼️</span>
-              {activeCopy.downloadAction}
-            </button>
-          </div>
         </section>
       </main>
     </div>
@@ -337,7 +327,7 @@ function ThemePreview({
           </div>
           <button
             type="button"
-            className="mt-4 w-full rounded-2xl px-4 py-3 text-sm font-bold transition hover:brightness-105 active:scale-[0.98]"
+            className="mt-4 w-full rounded-2xl px-4 py-3 text-sm font-bold whitespace-nowrap transition hover:brightness-105 active:scale-[0.98]"
             style={{ backgroundColor: LINE_GREEN, color: "#ffffff" }}
           >
             {copy.buttonLabel}
