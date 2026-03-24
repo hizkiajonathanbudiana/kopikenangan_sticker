@@ -1,36 +1,27 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## LINE Sticker Template UI Kit
 
-## Getting Started
+Interactive LINE sticker mockups powered by Next.js + Tailwind. Toggle between the **Ka-Kun (Kawung)** and **Mega-Miu (Mega Mendung)** templates on the landing page, flip the copy between 繁中 / English, and preview the final LINE Store layout plus the sticker filename checklist in one place.
 
-First, run the development server:
+### Run locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit [http://localhost:3000](http://localhost:3000) to play with the flow.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Customize stickers & copy
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Update `src/data/stickerLab.ts` to tweak locale copy, add themes, or change sticker filenames.
+- Drop PNG/JPG assets into `public/stickers/kawung/` or `public/stickers/mega/` (filenames must match the entries in the data file). The preview + checklist load straight from those folders.
+- To support additional locales, extend the `languageOptions`, `localeDisplayName`, and `uiCopy` maps.
 
-## Learn More
+### Deploy
 
-To learn more about Next.js, take a look at the following resources:
+Any static-friendly host works. For a quick GitHub deployment:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Commit this folder to your repo.
+2. Enable the Next.js build pipeline on Vercel, Netlify, or set up GitHub Actions running `npm run build` followed by `npm run start` (or export via `next export`).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Happy shipping!  
