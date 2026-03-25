@@ -125,7 +125,7 @@ export const stickerThemes: StickerTheme[] = [
       },
       zh: {
         brandTag: "Kopi Kenangan Official",
-        title: "品牌商務 × 卡君（Kawung）",
+        title: "Kopi Kenangan × 卡君（Kawung）",
         description:
           "Kopi Kenangan × 卡君免費貼圖今天上線囉！讓充滿日惹 Kawung 傳統風情的卡君陪你聊天，下載期限至 2026/04/16。",
   accountTitle: "Kopi Kenangan",
@@ -174,7 +174,7 @@ export const stickerThemes: StickerTheme[] = [
       },
       zh: {
         brandTag: "Kopi Kenangan Official",
-        title: "品牌商務 × 雲美格",
+        title: "Kopi Kenangan × 雲美格",
         description:
           "Kopi Kenangan × 雲美格（Mega-Miu）免費貼圖今天上線囉！帶著井里汶 Mega Mendung 雲朵圖騰の超萌美格陪你聊天，下載期限至 2026/04/16。",
   accountTitle: "Kopi Kenangan",
