@@ -295,7 +295,7 @@ function ThemePreview({
       // Klik di sembarang area kosong akan me-reset zoom stiker
       onClick={() => setZoomedId(null)}
     >
-      <div className="flex items-center justify-between border-b border-slate-100 p-3 pb-1 text-sm uppercase tracking-[0.35em] text-slate-500">
+      <div className="flex items-center justify-between border-b border-slate-100 p-5 pb-2 text-sm uppercase tracking-[0.35em] text-slate-500">
         <span>LINE STORE</span>
         <div className="flex items-center gap-4 text-base text-slate-400">
           <span>↑</span>
