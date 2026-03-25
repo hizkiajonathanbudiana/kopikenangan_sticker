@@ -113,7 +113,7 @@ export const stickerThemes: StickerTheme[] = [
     copy: {
       en: {
         brandTag: "Kopi Kenangan Official",
-        title: "Brand Commerce × Ka-Kun (Kawung)",
+        title: "Kopi Kenangan × Ka-Kun (Kawung)",
         description:
           "Kopi Kenangan × Ka-Kun free stickers launch today! Bring Yogyakarta's Kawung heritage to every conversation and add the official account to claim before 2026/04/16.",
   accountTitle: "Kopi Kenangan",
@@ -162,7 +162,7 @@ export const stickerThemes: StickerTheme[] = [
     copy: {
       en: {
         brandTag: "Kopi Kenangan Official",
-        title: "Brand Commerce × Mega-Miu",
+        title: "Kopi Kenangan × Mega-Miu",
         description:
           "Kopi Kenangan × Mega-Miu free stickers are live! Bring the Mega Mendung cloud motif to your chat list and grab them before 2026/04/16.",
   accountTitle: "Kopi Kenangan",
