@@ -2,15 +2,17 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import {
+import React, {
     type ChangeEvent,
     type DragEvent,
+    type HTMLAttributes,
+    Suspense,
     useEffect,
+    forwardRef,
     useMemo,
     useRef,
     useState,
 } from "react";
-import type { ModelViewerElement } from "@/types/model-viewer";
 
 const HERO_BADGE = "數位文創應用 | Digital & Cultural";
 const HERO_TITLE = "Kopi Kenangan × Batik LINE Stickers";
@@ -29,7 +31,37 @@ type ViewerControls = {
     rotateSpeed: number;
 };
 
-export default function ThreeDPage() {
+type ModelViewerElement = HTMLElement & {
+    resetTurntableRotation?: () => void;
+};
+
+type ModelViewerProps = HTMLAttributes<ModelViewerElement> & {
+    src?: string;
+    alt?: string;
+    ar?: boolean | string;
+    autoplay?: boolean | string;
+    "touch-action"?: string;
+    "camera-controls"?: boolean | string;
+    "auto-rotate"?: boolean | string;
+    "auto-rotate-delay"?: string | number;
+    "interaction-prompt"?: string;
+    "rotation-per-second"?: string;
+    exposure?: number;
+    "shadow-intensity"?: string;
+    "shadow-softness"?: string;
+    "environment-image"?: string;
+};
+
+const ModelViewer = forwardRef<ModelViewerElement, ModelViewerProps>((props, ref) => {
+    return React.createElement("model-viewer" as any, {
+        ...props,
+        ref,
+    });
+});
+
+ModelViewer.displayName = "ModelViewer";
+
+function ThreeDPageContent() {
     const searchParams = useSearchParams();
     const initialModel = searchParams.get("model");
     const sanitizedParam = initialModel && initialModel.trim().length > 0 ? initialModel : null;
@@ -288,30 +320,30 @@ export default function ThreeDPage() {
                         </div>
 
                         <div className="relative h-[520px] w-full bg-[#e6ebf5]">
-                            {hasModel ? (
-                                <model-viewer
-                                    ref={(node: ModelViewerElement | null) => {
-                                        viewerRef.current = node;
-                                    }}
-                                    src={modelSrc ?? undefined}
-                                    alt="3D model preview"
-                                    ar
-                                    autoplay
-                                    interaction-prompt="none"
-                                    touch-action="pan-y"
-                                    camera-controls
-                                    auto-rotate={controls.autoRotate ? "" : undefined}
-                                    auto-rotate-delay="0"
-                                    rotation-per-second={controls.autoRotate ? `${controls.rotateSpeed}deg` : undefined}
-                                    exposure={controls.exposure}
-                                    shadow-intensity={controls.showShadow ? "1" : "0"}
-                                    shadow-softness={controls.showShadow ? "0.8" : "0"}
-                                    environment-image="neutral"
-                                    style={{ width: "100%", height: "100%" }}
-                                    onLoad={onViewerLoad}
-                                    onError={onViewerError}
-                                />
-                            ) : (
+                                            {hasModel ? (
+                                                <ModelViewer
+                                                    ref={(node: ModelViewerElement | null) => {
+                                                        viewerRef.current = node;
+                                                    }}
+                                                    src={modelSrc ?? undefined}
+                                                    alt="3D model preview"
+                                                    ar
+                                                    autoplay
+                                                    interaction-prompt="none"
+                                                    touch-action="pan-y"
+                                                    camera-controls=""
+                                                    auto-rotate={controls.autoRotate ? "" : undefined}
+                                                    auto-rotate-delay="0"
+                                                    rotation-per-second={controls.autoRotate ? `${controls.rotateSpeed}deg` : undefined}
+                                                    exposure={controls.exposure}
+                                                    shadow-intensity={controls.showShadow ? "1" : "0"}
+                                                    shadow-softness={controls.showShadow ? "0.8" : "0"}
+                                                    environment-image="neutral"
+                                                    style={{ width: "100%", height: "100%" }}
+                                                    onLoad={onViewerLoad}
+                                                    onError={onViewerError}
+                                                />
+                                            ) : (
                                 <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-center text-slate-500">
                                     <span className="text-4xl">🧊</span>
                                     <p className="max-w-sm text-base text-slate-500">
@@ -330,5 +362,19 @@ export default function ThreeDPage() {
                 </section>
             </main>
         </div>
+    );
+}
+
+export default function ThreeDPage() {
+    return (
+        <Suspense
+            fallback={
+                <div className="flex min-h-screen items-center justify-center bg-[#f5f7fb] text-slate-500">
+                    Loading 3D viewer…
+                </div>
+            }
+        >
+            <ThreeDPageContent />
+        </Suspense>
     );
 }

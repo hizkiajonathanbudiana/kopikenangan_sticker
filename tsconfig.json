@@ -18,6 +18,7 @@
         "name": "next"
       }
     ],
+    "types": ["node", "react", "react-dom", "next", "next/types/global"],
     "paths": {
       "@/*": ["./src/*"]
     }
