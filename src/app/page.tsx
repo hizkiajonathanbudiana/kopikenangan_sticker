@@ -6,6 +6,7 @@ import { type CSSProperties, useMemo, useState, useRef, useEffect } from "react"
 import { toPng } from "html-to-image";
 import html2canvas from "html2canvas";
 import { converter, parse as parseColor } from "culori";
+import Link from "next/link";
 
 import {
   Locale,
@@ -131,6 +132,14 @@ export default function Home() {
     <div className="min-h-screen bg-[#f5f7fb] text-slate-900">
       <main className="mx-auto flex w-full max-w-[1200px] flex-col gap-10 px-4 py-16">
         <header className="space-y-4 text-center">
+          <div className="flex justify-center">
+            <Link
+              href="/3d"
+              className="inline-flex items-center justify-center rounded-full border border-slate-900 px-6 py-3 text-sm font-semibold uppercase tracking-[0.25em] text-slate-900 transition hover:bg-slate-900 hover:text-white"
+            >
+              3D Model Preview Here  !!
+            </Link>
+          </div>
           <p className="text-xs uppercase tracking-[0.35em] text-slate-500">
             {landingCopy.templateLabel}
           </p>
