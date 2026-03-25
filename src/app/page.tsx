@@ -18,11 +18,9 @@ import {
 } from "@/data/stickerLab";
 
 const PREVIEW_EXPORT_WIDTH = 1500;
-const PREVIEW_EXPORT_HEIGHT = 3200;
-const PREVIEW_ASPECT_RATIO = PREVIEW_EXPORT_HEIGHT / PREVIEW_EXPORT_WIDTH;
+const PREVIEW_ASPECT_RATIO = 3200 / 1500;
 const PREVIEW_DISPLAY_WIDTH = 520;
 const PREVIEW_DISPLAY_HEIGHT = Math.round(PREVIEW_DISPLAY_WIDTH * PREVIEW_ASPECT_RATIO);
-const PREVIEW_EXPORT_SCALE = PREVIEW_EXPORT_WIDTH / PREVIEW_DISPLAY_WIDTH;
 
 const landingCopy = {
   heroTitle: "Kopi Kenangan × Batik LINE Stickers",
@@ -297,7 +295,7 @@ function ThemePreview({
       // Klik di sembarang area kosong akan me-reset zoom stiker
       onClick={() => setZoomedId(null)}
     >
-      <div className="flex items-center justify-between border-b border-slate-100 p-8 pb-5 text-sm uppercase tracking-[0.35em] text-slate-500">
+      <div className="flex items-center justify-between border-b border-slate-100 p-3 pb-1 text-sm uppercase tracking-[0.35em] text-slate-500">
         <span>LINE STORE</span>
         <div className="flex items-center gap-4 text-base text-slate-400">
           <span>↑</span>
@@ -305,7 +303,7 @@ function ThemePreview({
         </div>
       </div>
 
-      <div className="flex flex-col items-center px-12 pb-10 pt-10 text-center">
+      <div className="flex flex-col items-center px-12 pb-10 pt-5 text-center">
         <div className="flex h-44 w-44 items-center justify-center rounded-[36px] border border-slate-200 bg-slate-50 overflow-hidden">
           <div className="h-full w-full">
             <img
@@ -368,7 +366,7 @@ function ThemePreview({
       </div>
 
       {/* Area Grid Stiker */}
-      <div className="relative px-6 pb-12 pt-2">
+      <div className="relative px-6 pb-8 pt-2">
         {/* UBAH DI SINI: PERMINTAAN USER 1 
           "Decorating (photos/profile) supported" ganti jadi "Decorating (photos/profile) not supported"
         */}
@@ -416,7 +414,7 @@ function ThemePreview({
         Ganti logo gambar copyright dengan teks "© Kopi kenangan".
         Diformat agar muted, centered, dan ikut meredup saat zoom.
       */}
-      <div className={`flex justify-center border-t border-slate-100 p-12 pt-10 transition-opacity duration-300 ${zoomedId ? 'opacity-30' : 'opacity-100'}`}>
+      <div className={`flex justify-center border-t border-slate-100 p-4 pt-4 transition-opacity duration-300 ${zoomedId ? 'opacity-30' : 'opacity-100'}`}>
         <p className="text-base font-medium tracking-tight text-slate-400">
           © Kopi kenangan
         </p>
@@ -500,44 +498,110 @@ function disableAnimations() {
 }
 
 async function renderWithHtmlToImage(node: HTMLElement) {
-  return toPng(node, {
-    cacheBust: true,
-    backgroundColor: "#ffffff",
-    pixelRatio: Math.max(window.devicePixelRatio || 1, 2),
-    width: PREVIEW_EXPORT_WIDTH,
-    height: PREVIEW_EXPORT_HEIGHT,
-    style: {
-      transform: `scale(${PREVIEW_EXPORT_SCALE})`,
-      transformOrigin: "top left",
-      width: `${PREVIEW_DISPLAY_WIDTH}px`,
-      height: `${PREVIEW_DISPLAY_HEIGHT}px`,
-    },
-  });
+  const { clone, cleanup, exportWidth, exportHeight, displayWidth, displayHeight, exportScale } =
+    prepareNodeForExport(node);
+  try {
+    return await toPng(clone, {
+      cacheBust: true,
+      backgroundColor: "#ffffff",
+      pixelRatio: Math.max(window.devicePixelRatio || 1, 2),
+      width: exportWidth,
+      height: exportHeight,
+      style: {
+        transform: `scale(${exportScale})`,
+        transformOrigin: "top left",
+        width: `${displayWidth}px`,
+        height: `${displayHeight}px`,
+      },
+    });
+  } finally {
+    cleanup();
+  }
 }
 
 async function renderWithHtml2Canvas(node: HTMLElement) {
-  const canvas = await html2canvas(node, {
-    scale: Math.max(window.devicePixelRatio || 1, 2),
-    useCORS: true,
-    allowTaint: false,
-    width: PREVIEW_EXPORT_WIDTH,
-    height: PREVIEW_EXPORT_HEIGHT,
-    backgroundColor: "#ffffff",
-    logging: false,
-    removeContainer: true,
-    onclone: (clonedDoc) => {
-      const clonedPreview = clonedDoc.querySelector<HTMLElement>("[data-preview-root='true']");
-      if (clonedPreview) {
-        clonedPreview.style.transform = `scale(${PREVIEW_EXPORT_SCALE})`;
-        clonedPreview.style.transformOrigin = "top left";
-        clonedPreview.style.width = `${PREVIEW_DISPLAY_WIDTH}px`;
-        clonedPreview.style.height = `${PREVIEW_DISPLAY_HEIGHT}px`;
-        normalizeColorsForCanvas(clonedPreview);
-      }
-    },
-  });
+  const { clone, cleanup, exportWidth, exportHeight, displayWidth, displayHeight, exportScale } =
+    prepareNodeForExport(node);
+  try {
+    const canvas = await html2canvas(clone, {
+      scale: Math.max(window.devicePixelRatio || 1, 2),
+      useCORS: true,
+      allowTaint: false,
+      width: exportWidth,
+      height: exportHeight,
+      backgroundColor: "#ffffff",
+      logging: false,
+      removeContainer: true,
+      onclone: (clonedDoc) => {
+        const clonedPreview = clonedDoc.querySelector<HTMLElement>("[data-preview-root='true']");
+        if (clonedPreview) {
+          clonedPreview.style.transform = `scale(${exportScale})`;
+          clonedPreview.style.transformOrigin = "top left";
+          clonedPreview.style.width = `${displayWidth}px`;
+          clonedPreview.style.height = `${displayHeight}px`;
+          normalizeColorsForCanvas(clonedPreview);
+        }
+      },
+    });
 
-  return canvas.toDataURL("image/png");
+    return canvas.toDataURL("image/png");
+  } finally {
+    cleanup();
+  }
+}
+
+function prepareNodeForExport(node: HTMLElement) {
+  const root = getPreviewRoot(node);
+  if (!root) {
+    return {
+      clone: node,
+      cleanup: () => { },
+      displayWidth: PREVIEW_DISPLAY_WIDTH,
+      displayHeight: PREVIEW_DISPLAY_HEIGHT,
+      exportWidth: PREVIEW_EXPORT_WIDTH,
+      exportHeight: Math.round(PREVIEW_DISPLAY_HEIGHT * (PREVIEW_EXPORT_WIDTH / PREVIEW_DISPLAY_WIDTH)),
+      exportScale: PREVIEW_EXPORT_WIDTH / PREVIEW_DISPLAY_WIDTH,
+    };
+  }
+
+  const rect = root.getBoundingClientRect();
+  const displayWidth = rect.width || PREVIEW_DISPLAY_WIDTH;
+  const displayHeight = rect.height || PREVIEW_DISPLAY_HEIGHT;
+  const exportWidth = PREVIEW_EXPORT_WIDTH;
+  const exportScale = exportWidth / displayWidth;
+  const exportHeight = Math.round(displayHeight * exportScale);
+
+  const clone = root.cloneNode(true) as HTMLElement;
+  clone.style.transform = "none";
+  clone.style.position = "absolute";
+  clone.style.top = "0";
+  clone.style.left = "0";
+  clone.style.width = `${displayWidth}px`;
+  clone.style.height = `${displayHeight}px`;
+  clone.style.backgroundColor = "#ffffff";
+  clone.style.boxShadow = "none";
+  clone.classList.add("download-clone");
+
+  root.appendChild(clone);
+
+  return {
+    clone,
+    cleanup: () => {
+      clone.remove();
+    },
+    displayWidth,
+    displayHeight,
+    exportWidth,
+    exportHeight,
+    exportScale,
+  };
+}
+
+function getPreviewRoot(node: HTMLElement) {
+  if (node.matches('[data-preview-root="true"]')) {
+    return node;
+  }
+  return node.querySelector<HTMLElement>('[data-preview-root="true"]');
 }
 
 function triggerDownload(dataUrl: string, filename: string) {
