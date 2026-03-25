@@ -6,9 +6,10 @@ import QRCode from "qrcode";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const targetUrl = process.env.QR_TARGET_URL || "https://kopikenangan.com";
+const targetUrl =
+    process.env.QR_TARGET_URL || "https://kopikenangan-sticker.vercel.app/3d";
 const outputDir = path.resolve(__dirname, "../public");
-const outputFilename = process.env.QR_FILENAME || "qr-kopikenangan.png";
+const outputFilename = process.env.QR_FILENAME || "qr-kopikenangan-3d.png";
 const outputPath = path.join(outputDir, outputFilename);
 
 const qrOptions = {
