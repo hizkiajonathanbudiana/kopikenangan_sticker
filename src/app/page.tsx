@@ -17,8 +17,12 @@ import {
   // globalAssets dihapus
 } from "@/data/stickerLab";
 
-const PREVIEW_BASE_WIDTH = 430;
-const PREVIEW_BASE_HEIGHT = 780;
+const PREVIEW_EXPORT_WIDTH = 1500;
+const PREVIEW_EXPORT_HEIGHT = 3200;
+const PREVIEW_ASPECT_RATIO = PREVIEW_EXPORT_HEIGHT / PREVIEW_EXPORT_WIDTH;
+const PREVIEW_DISPLAY_WIDTH = 520;
+const PREVIEW_DISPLAY_HEIGHT = Math.round(PREVIEW_DISPLAY_WIDTH * PREVIEW_ASPECT_RATIO);
+const PREVIEW_EXPORT_SCALE = PREVIEW_EXPORT_WIDTH / PREVIEW_DISPLAY_WIDTH;
 
 const landingCopy = {
   heroTitle: "Kopi Kenangan × Batik LINE Stickers",
@@ -35,7 +39,7 @@ export default function Home() {
   const [previewRefState, setPreviewRefState] = useState<HTMLDivElement | null>(null);
   const previewWrapperRef = useRef<HTMLDivElement | null>(null);
   const [previewScale, setPreviewScale] = useState(1);
-  const [previewHeight, setPreviewHeight] = useState(PREVIEW_BASE_HEIGHT);
+  const [previewHeight, setPreviewHeight] = useState(PREVIEW_DISPLAY_HEIGHT);
 
   const activeTheme = useMemo(
     () => stickerThemes.find((theme) => theme.id === activeThemeId)!,
@@ -54,7 +58,9 @@ export default function Home() {
     const updateScale = () => {
       const width = node.clientWidth;
       if (!width) return;
-      const nextScale = Math.min(1, width / PREVIEW_BASE_WIDTH);
+
+      // ✅ Biarkan nge-scale menyesuaikan lebar container
+      const nextScale = width / PREVIEW_DISPLAY_WIDTH;
       setPreviewScale(Number(nextScale.toFixed(4)));
     };
 
@@ -70,23 +76,20 @@ export default function Home() {
 
   useEffect(() => {
     if (!previewRefState) {
-      setPreviewHeight(PREVIEW_BASE_HEIGHT);
+      setPreviewHeight(PREVIEW_DISPLAY_HEIGHT);
       return;
     }
 
     const node = previewRefState;
 
     const updateHeight = () => {
-      const nextHeight = node.offsetHeight || PREVIEW_BASE_HEIGHT;
-      setPreviewHeight(nextHeight);
+      setPreviewHeight(node.offsetHeight || PREVIEW_DISPLAY_HEIGHT);
     };
 
     updateHeight();
 
-    const resizeObserver = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (!entry) return;
-      setPreviewHeight(entry.contentRect.height || PREVIEW_BASE_HEIGHT);
+    const resizeObserver = new ResizeObserver(() => {
+      updateHeight();
     });
 
     resizeObserver.observe(node);
@@ -98,7 +101,10 @@ export default function Home() {
 
   // Fungsi untuk mengunduh preview sebagai gambar PNG
   const handleDownloadPreview = async () => {
-    if (!previewRefState) return;
+    if (!previewRefState || !isDesktopEnvironment()) {
+      alert("Download PNG hanya tersedia di browser desktop.");
+      return;
+    }
 
     const cleanupAnimations = disableAnimations();
     const cleanupBackground = enforceSolidBackground(previewRefState);
@@ -125,7 +131,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#f5f7fb] text-slate-900">
-      <main className="mx-auto flex w-full max-w-4xl flex-col gap-10 px-4 py-16">
+      <main className="mx-auto flex w-full max-w-[1200px] flex-col gap-10 px-4 py-16">
         <header className="space-y-4 text-center">
           <p className="text-xs uppercase tracking-[0.35em] text-slate-500">
             {landingCopy.templateLabel}
@@ -144,7 +150,7 @@ export default function Home() {
         </div>
 
         {/* WRAPPER PREVIEW */}
-        <section className="mx-auto flex w-full max-w-[520px] flex-col gap-6">
+        <section className="mx-auto flex w-full max-w-[1120px] flex-col gap-6">
           <div className="text-center">
             <p className="text-xs uppercase tracking-[0.35em] text-slate-500">
               {activeCopy.previewTitle}
@@ -159,6 +165,7 @@ export default function Home() {
               className="preview-scale-wrapper"
               style={{
                 "--preview-scale": `${previewScale}`,
+                "--preview-target-width": `${PREVIEW_DISPLAY_WIDTH}px`,
                 "--preview-target-height": `${previewHeight}px`,
               } as CSSProperties}
             >
@@ -172,6 +179,18 @@ export default function Home() {
             </div>
           </div>
 
+          <div className="download-button-shell" aria-live="polite">
+            <p className="download-button-note">PNG export (desktop only)</p>
+            <button
+              type="button"
+              onClick={handleDownloadPreview}
+              disabled={!previewRefState}
+              className="download-button flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-3 text-sm font-medium text-slate-600 transition hover:border-slate-400 hover:bg-slate-50 hover:text-slate-900 disabled:opacity-50"
+            >
+              <span>🖼️</span>
+              {activeCopy.downloadAction}
+            </button>
+          </div>
         </section>
       </main>
     </div>
@@ -278,7 +297,7 @@ function ThemePreview({
       // Klik di sembarang area kosong akan me-reset zoom stiker
       onClick={() => setZoomedId(null)}
     >
-      <div className="flex items-center justify-between border-b border-slate-100 p-6 pb-4 text-xs uppercase tracking-[0.3em] text-slate-500">
+  <div className="flex items-center justify-between border-b border-slate-100 p-8 pb-5 text-sm uppercase tracking-[0.35em] text-slate-500">
         <span>LINE STORE</span>
         <div className="flex items-center gap-4 text-base text-slate-400">
           <span>↑</span>
@@ -286,8 +305,8 @@ function ThemePreview({
         </div>
       </div>
 
-      <div className="flex flex-col items-center px-12 pb-6 pt-6 text-center">
-        <div className="flex h-36 w-36 items-center justify-center rounded-[30px] border border-slate-200 bg-slate-50 overflow-hidden">
+      <div className="flex flex-col items-center px-12 pb-10 pt-10 text-center">
+        <div className="flex h-44 w-44 items-center justify-center rounded-[36px] border border-slate-200 bg-slate-50 overflow-hidden">
           <div className="h-full w-full">
             <img
               src={theme.logo}
@@ -297,27 +316,27 @@ function ThemePreview({
             />
           </div>
         </div>
-        <span className="mt-6 rounded-full border border-slate-200 bg-slate-50 px-4 py-1 text-xs text-slate-500">
+        <span className="mt-8 rounded-full border border-slate-200 bg-slate-50 px-6 py-2 text-sm text-slate-500">
           {copy.brandTag}
         </span>
-        <h3 className="mt-4 text-2xl font-semibold">{copy.title}</h3>
-        <p className="text-sm text-slate-500">{copy.validity}</p>
+        <h3 className="mt-5 text-[32px] font-semibold leading-tight">{copy.title}</h3>
+        <p className="text-base text-slate-500">{copy.validity}</p>
       </div>
 
-      <div className="space-y-4 px-12 pb-6">
-        <div className="rounded-3xl border border-slate-100 bg-slate-50 p-4">
+      <div className="space-y-6 px-12 pb-8">
+        <div className="rounded-3xl border border-slate-100 bg-slate-50 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold">{copy.accountTitle}</p>
-              <p className="text-xs text-slate-500">{copy.sponsorTagline}</p>
+              <p className="text-base font-semibold">{copy.accountTitle}</p>
+              <p className="text-sm text-slate-500">{copy.sponsorTagline}</p>
             </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full border border-slate-200 bg-white">
               <img
                 src="/stickers/kopikenangan.png"
                 alt="Kopi Kenangan logo"
-                width={28}
-                height={28}
-                className="h-7 w-7 object-contain"
+                width={32}
+                height={32}
+                className="h-8 w-8 object-contain"
                 loading="lazy"
                 decoding="async"
                 crossOrigin="anonymous"
@@ -327,7 +346,7 @@ function ThemePreview({
           </div>
           <button
             type="button"
-            className="mt-4 w-full rounded-2xl px-4 py-3 text-sm font-bold whitespace-nowrap transition hover:brightness-105 active:scale-[0.98]"
+            className="mt-5 w-full rounded-2xl px-5 py-4 text-base font-bold whitespace-nowrap transition hover:brightness-105 active:scale-[0.98]"
             style={{ backgroundColor: LINE_GREEN, color: "#ffffff" }}
           >
             {copy.buttonLabel}
@@ -335,7 +354,7 @@ function ThemePreview({
         </div>
 
         {/* Teks Deskripsi akan memudar jika ada stiker yang di-zoom */}
-        <p className={`text-[13px] leading-relaxed text-slate-500 transition-opacity duration-300 ${zoomedId ? 'opacity-30' : 'opacity-100'}`}>
+        <p className={`text-[15px] leading-relaxed text-slate-500 transition-opacity duration-300 ${zoomedId ? 'opacity-30' : 'opacity-100'}`}>
           {copy.description}
         </p>
       </div>
@@ -345,13 +364,13 @@ function ThemePreview({
         {/* UBAH DI SINI: PERMINTAAN USER 1 
           "Decorating (photos/profile) supported" ganti jadi "Decorating (photos/profile) not supported"
         */}
-        <div className={`mb-6 ml-2 flex items-center gap-1.5 text-xs text-slate-400 transition-opacity duration-300 ${zoomedId ? 'opacity-30' : 'opacity-100'}`}>
-          <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full border border-slate-400 text-[9px]">i</span>
+        <div className={`mb-8 ml-2 flex items-center gap-2 text-sm text-slate-400 transition-opacity duration-300 ${zoomedId ? 'opacity-30' : 'opacity-100'}`}>
+          <span className="flex h-4 w-4 items-center justify-center rounded-full border border-slate-400 text-[10px]">i</span>
           Decorating (photos/profile) not supported
         </div>
 
         {/* Grid Stiker */}
-        <div className="grid grid-cols-4 gap-x-2 gap-y-6 relative z-10">
+        <div className="grid grid-cols-4 gap-x-4 gap-y-8 relative z-10">
           {theme.stickers.map((sticker) => {
             const isZoomed = zoomedId === sticker.filename;
             const isDimmed = zoomedId && !isZoomed;
@@ -376,7 +395,7 @@ function ThemePreview({
                     themeFolder={theme.assetFolder}
                     filename={sticker.filename}
                     alt={`${copy.title} - ${sticker.label[locale]}`}
-                    size={72}
+                    size={84}
                   />
                 </button>
               </div>
@@ -389,8 +408,8 @@ function ThemePreview({
         Ganti logo gambar copyright dengan teks "© Kopi kenangan".
         Diformat agar muted, centered, dan ikut meredup saat zoom.
       */}
-      <div className={`flex justify-center border-t border-slate-100 p-10 pt-8 transition-opacity duration-300 ${zoomedId ? 'opacity-30' : 'opacity-100'}`}>
-        <p className="text-sm font-medium tracking-tight text-slate-400">
+      <div className={`flex justify-center border-t border-slate-100 p-12 pt-10 transition-opacity duration-300 ${zoomedId ? 'opacity-30' : 'opacity-100'}`}>
+        <p className="text-base font-medium tracking-tight text-slate-400">
           © Kopi kenangan
         </p>
       </div>
@@ -477,6 +496,14 @@ async function renderWithHtmlToImage(node: HTMLElement) {
     cacheBust: true,
     backgroundColor: "#ffffff",
     pixelRatio: Math.max(window.devicePixelRatio || 1, 2),
+    width: PREVIEW_EXPORT_WIDTH,
+    height: PREVIEW_EXPORT_HEIGHT,
+    style: {
+      transform: `scale(${PREVIEW_EXPORT_SCALE})`,
+      transformOrigin: "top left",
+      width: `${PREVIEW_DISPLAY_WIDTH}px`,
+      height: `${PREVIEW_DISPLAY_HEIGHT}px`,
+    },
   });
 }
 
@@ -485,12 +512,18 @@ async function renderWithHtml2Canvas(node: HTMLElement) {
     scale: Math.max(window.devicePixelRatio || 1, 2),
     useCORS: true,
     allowTaint: false,
+    width: PREVIEW_EXPORT_WIDTH,
+    height: PREVIEW_EXPORT_HEIGHT,
     backgroundColor: "#ffffff",
     logging: false,
     removeContainer: true,
     onclone: (clonedDoc) => {
       const clonedPreview = clonedDoc.querySelector<HTMLElement>("[data-preview-root='true']");
       if (clonedPreview) {
+        clonedPreview.style.transform = `scale(${PREVIEW_EXPORT_SCALE})`;
+        clonedPreview.style.transformOrigin = "top left";
+        clonedPreview.style.width = `${PREVIEW_DISPLAY_WIDTH}px`;
+        clonedPreview.style.height = `${PREVIEW_DISPLAY_HEIGHT}px`;
         normalizeColorsForCanvas(clonedPreview);
       }
     },
@@ -519,6 +552,13 @@ function shouldUseHtml2CanvasFallback() {
     /Macintosh/.test(ua) && /Safari/i.test(ua) && !/Chrome|CriOS|FxiOS|EdgiOS/i.test(ua);
 
   return isIOS || isMacSafari;
+}
+
+function isDesktopEnvironment() {
+  if (typeof navigator === "undefined") return true;
+  const ua = navigator.userAgent || "";
+  const isMobile = /Mobi|Android|iP(ad|hone|od)/i.test(ua);
+  return !isMobile;
 }
 
 const COLOR_PROPS: Array<[keyof CSSStyleDeclaration, string]> = [

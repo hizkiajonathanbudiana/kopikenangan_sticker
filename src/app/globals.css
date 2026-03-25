@@ -20,6 +20,32 @@ body {
   min-height: 100vh;
 }
 
+.download-button-shell {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 1rem;
+}
+
+.download-button-note {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #94a3b8;
+}
+
+.download-button {
+  width: min(100%, 360px);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
+}
+
+@media (min-width: 1024px) {
+  .download-button-shell {
+    display: flex;
+  }
+}
+
 .preview-scale-wrapper {
   --preview-target-width: 430px;
   --preview-target-height: 780px;
